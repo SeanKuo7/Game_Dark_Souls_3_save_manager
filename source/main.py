@@ -1,5 +1,6 @@
 import pathlib
 from datetime import datetime
+import zipfile
 
 print("Working directory: ", pathlib.Path().resolve())
 
@@ -28,6 +29,10 @@ def backupSave(inputPath, outputPath):
     now = datetime.now()
     currentTimeStr = now.strftime("_%Y.%m.%d_%H%M%S")
     #print("Current Time =", currentTimeStr)
+    outputBackupFilePath = outputPath+"\\DarkSoulsIII"+currentTimeStr+".zip"
+    print(outputBackupFilePath)
+    with zipfile.ZipFile(outputBackupFilePath, 'w') as backupZip:
+        backupZip.write('eggs.txt')
     return
 
 
