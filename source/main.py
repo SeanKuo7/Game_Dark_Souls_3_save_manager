@@ -1,4 +1,6 @@
 import pathlib
+from datetime import datetime
+
 print("Working directory: ", pathlib.Path().resolve())
 
 def readPathesFromConfig():
@@ -23,7 +25,9 @@ def readPathesFromConfig():
 def backupSave(inputPath, outputPath):
     print(inputPath)
     print(outputPath)
-    
+    now = datetime.now()
+    currentTimeStr = now.strftime("_%Y.%m.%d_%H%M%S")
+    #print("Current Time =", currentTimeStr)
     return
 
 
