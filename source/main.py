@@ -5,6 +5,8 @@ import os
 import os.path
 import time
 import hashlib
+import sys
+import traceback
 
 print("Working directory: ", pathlib.Path().resolve())
 
@@ -12,20 +14,16 @@ def readPathesFromConfig():
     inputPath = ""
     outputPath = ""
     try:
-        print("entered")
-        f = open("config.ini", "r")
-        #print(f.read())
-        dirListRaw = f.readlines()
-        #print(dirList)
-        dirList = []
-        for dir in dirListRaw[:-1]:
-            dirTrimmed = dir[0:len(dir)-1]
-            dirList.append(dirTrimmed)
-        dirList.append(dirListRaw[-1])
-        f.close()
+        with open("config.ini", "r") as f: 
+            #print(f.read())
+            dirListRaw = f.readlines()
+            dirList = []
+            for dir in dirListRaw[:-1]:
+                dirTrimmed = dir[0:len(dir)-1]
+                dirList.append(dirTrimmed)
+            dirList.append(dirListRaw[-1])
         return(dirList)
     except:
-        f.close()
         print("reading config.ini failed!!")
     return
 
@@ -88,8 +86,31 @@ def fileMonitor(path2Watch, outputPath):
             backupSave(path2Watch, outputPath)
     return
 
-if __name__ == "__main__":
+def showExceptionNWait(exc_type, exc_value, tb):
+    try:
+        traceback.print_exception(exc_type, exc_value, tb)
+        input("Press any key to exit.")
+        sys.exit(-1)
+    except:
+        sys.exit(-1)
+
+def main():
     dirList = readPathesFromConfig()
+    if not dirList:
+        errorMsg = f'config.ini pathes error, got {dirList}'
+        print(errorMsg)
+        raise Exception(errorMsg)
+    
+    if len (dirList)<3:
+        errorMsg = f'config.ini pathes error, got {dirList}'
+        print(errorMsg)
+        raise Exception(errorMsg)
     fileMonitor(dirList[0], dirList[1])
+    return
+
+sys.excepthook = showExceptionNWait
+if __name__ == "__main__":
+    
+    main()
 
 
