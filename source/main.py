@@ -74,16 +74,18 @@ def getCheckSums(path):
 def fileMonitor(path2Watch, outputPath):
     before = getCheckSums(path2Watch)
     while 1:
-        time.sleep (5)
+        time.sleep (10)
         after = getCheckSums(path2Watch)
         print(before,after)
         if before != after:
             print("modified!!!")
+            time.sleep(30)
             now = datetime.now()
             currentTimeStr = now.strftime("_%Y.%m.%d_%H%M%S")
             # print(currentTimeStr)
             before = after
             backupSave(path2Watch, outputPath)
+            
     return
 
 def showExceptionNWait(exc_type, exc_value, tb):
@@ -96,12 +98,13 @@ def showExceptionNWait(exc_type, exc_value, tb):
 
 def main():
     dirList = readPathesFromConfig()
+    print(dirList)
     if not dirList:
         errorMsg = f'config.ini pathes error, got {dirList}'
         print(errorMsg)
         raise Exception(errorMsg)
     
-    if len (dirList)<3:
+    if len (dirList)<2:
         errorMsg = f'config.ini pathes error, got {dirList}'
         print(errorMsg)
         raise Exception(errorMsg)
