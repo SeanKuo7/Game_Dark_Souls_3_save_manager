@@ -3,6 +3,7 @@ from datetime import datetime
 from zipfile import ZipFile
 import os
 import os.path
+import time
 
 print("Working directory: ", pathlib.Path().resolve())
 
@@ -52,10 +53,37 @@ def backupSave(inputPath, outputPath):
                 backupZip.write(filePath, dirInZipFile)
     return
 
+def fileMonitor(path2Watch, outputPath):
+    before = []
+    for folderName, subfolders, filenames in os.walk(path2Watch):
+        for filename in filenames:
+            filePath = os.path.join(folderName, filename)
+            lastModifiedTime = os.path.getmtime(filePath)
+            before.append(lastModifiedTime)
+    
+    while 1:
+        time.sleep (5)
+        after = []
+        for folderName, subfolders, filenames in os.walk(path2Watch):
+            for filename in filenames:
+                filePath = os.path.join(folderName, filename)
+                lastModifiedTime = os.path.getmtime(filePath)
+                after.append(lastModifiedTime)
+        print(before)
+        print(after)
+        if before != after:
+            # print("modified!!!")
+            now = datetime.now()
+            currentTimeStr = now.strftime("_%Y.%m.%d_%H%M%S")
+            # print(currentTimeStr)
+            before = after
+            backupSave(path2Watch, outputPath)
 
+        
+    return
 
 if __name__ == "__main__":
     dirList = readPathesFromConfig()
-    backupSave(dirList[0], dirList[1])
+    fileMonitor(dirList[0], dirList[1])
 
 
