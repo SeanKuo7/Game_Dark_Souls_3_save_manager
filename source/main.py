@@ -4,6 +4,7 @@ from zipfile import ZipFile
 import os
 import os.path
 import time
+import hashlib
 
 print("Working directory: ", pathlib.Path().resolve())
 
@@ -21,8 +22,10 @@ def readPathesFromConfig():
             dirTrimmed = dir[0:len(dir)-1]
             dirList.append(dirTrimmed)
         dirList.append(dirListRaw[-1])
+        f.close()
         return(dirList)
     except:
+        f.close()
         print("reading config.ini failed!!")
     return
 
@@ -53,33 +56,36 @@ def backupSave(inputPath, outputPath):
                 backupZip.write(filePath, dirInZipFile)
     return
 
-def fileMonitor(path2Watch, outputPath):
-    before = []
-    for folderName, subfolders, filenames in os.walk(path2Watch):
+def getCheckSums(path):
+    hashFunction = hashlib.md5()
+    returnList = []
+    for folderName, subfolders, filenames in os.walk(path):
         for filename in filenames:
             filePath = os.path.join(folderName, filename)
-            lastModifiedTime = os.path.getmtime(filePath)
-            before.append(lastModifiedTime)
-    
+            # lastModifiedTime = os.path.getmtime(filePath)
+            with open(filePath, "rb") as file_to_check:
+                # read contents of the file
+                # data = file_to_check.read()
+                # pipe contents of the file through
+                for chunk in iter(lambda: file_to_check.read(4096), b""):
+                    hashFunction.update(chunk)
+                md5_returned = hashFunction.hexdigest()
+            returnList.append(md5_returned)
+    return returnList
+
+def fileMonitor(path2Watch, outputPath):
+    before = getCheckSums(path2Watch)
     while 1:
         time.sleep (5)
-        after = []
-        for folderName, subfolders, filenames in os.walk(path2Watch):
-            for filename in filenames:
-                filePath = os.path.join(folderName, filename)
-                lastModifiedTime = os.path.getmtime(filePath)
-                after.append(lastModifiedTime)
-        print(before)
-        print(after)
+        after = getCheckSums(path2Watch)
+        print(before,after)
         if before != after:
-            # print("modified!!!")
+            print("modified!!!")
             now = datetime.now()
             currentTimeStr = now.strftime("_%Y.%m.%d_%H%M%S")
             # print(currentTimeStr)
             before = after
             backupSave(path2Watch, outputPath)
-
-        
     return
 
 if __name__ == "__main__":
